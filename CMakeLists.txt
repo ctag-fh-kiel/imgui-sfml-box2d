@@ -23,8 +23,13 @@ FetchContent_Declare(ImGui-SFML
     GIT_TAG 2.6.x)
 FetchContent_MakeAvailable(ImGui-SFML)
 
+FetchContent_Declare(box2d
+        GIT_REPOSITORY      https://github.com/erincatto/Box2D.git
+        GIT_TAG             v2.4.1)
+FetchContent_MakeAvailable(box2d)
+
 add_executable(CMakeSFMLProject src/main.cpp)
-target_link_libraries(CMakeSFMLProject PRIVATE sfml-graphics ImGui-SFML::ImGui-SFML)
+target_link_libraries(CMakeSFMLProject PRIVATE sfml-graphics ImGui-SFML::ImGui-SFML box2d)
 target_compile_features(CMakeSFMLProject PRIVATE cxx_std_17)
 
 if(WIN32)
