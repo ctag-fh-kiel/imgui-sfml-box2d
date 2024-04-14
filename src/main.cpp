@@ -9,6 +9,9 @@
 // SFML uses degrees for angles while Box2D uses radians
 #define DEG_PER_RAD 57.2957795f
 
+#define kWidth 1024u
+#define kHeight 1024u
+
 struct MovingItem{
     b2Body* body;
     b2BodyDef bodyDef;
@@ -22,7 +25,7 @@ int main()
 {
     // Box2D world for physics simulation, gravity
     b2World world(b2Vec2(0.f, 5.f));
-    auto window {sf::RenderWindow{ { 1024u, 1024u }, "CMake SFML Project" }};
+    auto window {sf::RenderWindow{ { kWidth, kHeight }, "CMake SFML Project" }};
     window.setFramerateLimit(30);
     ImGui::SFML::Init(window);
 
@@ -37,9 +40,9 @@ int main()
 
     // create screen bounds for box2d
     b2BodyDef screenBoundsDef;
-    screenBoundsDef.position.Set(0.f/PPM, 900.f/PPM);
+    screenBoundsDef.position.Set(0.f/PPM, static_cast<float>(kHeight - 200)/PPM);
     b2PolygonShape screenBoundsShape;
-    screenBoundsShape.SetAsBox(1024.f/PPM, 10.f/PPM);
+    screenBoundsShape.SetAsBox(static_cast<float>(kWidth)/PPM, 10.f/PPM);
     b2Body* screenBoundsBody = world.CreateBody(&screenBoundsDef);
     screenBoundsBody->CreateFixture(&screenBoundsShape, 0.f);
 
@@ -61,7 +64,7 @@ int main()
         s.bodyDef.position.Set(0, 0);
         s.body = world.CreateBody(&s.bodyDef);
         // position body randomly on screen
-        s.body->SetTransform(b2Vec2(rand() % 1024 / PPM, rand() % 1024 / PPM), 0);
+        s.body->SetTransform(b2Vec2(rand() % kWidth / PPM, rand() % kHeight / PPM), 0);
         // creating a fixture
         s.shape.SetAsBox(s.sprite.getGlobalBounds().width / 2 / PPM, s.sprite.getGlobalBounds().height / 2 / PPM);
         s.fixtureDef.shape = &s.shape;
@@ -70,6 +73,21 @@ int main()
         s.fixtureDef.restitution = 0.5;
         s.body->CreateFixture(&s.fixtureDef);
     }
+
+    // play with a shader
+    if(!sf::Shader::isAvailable()){
+        std::cout << "Shaders are not available" << std::endl;
+        exit(-1);
+    }
+
+    auto shaderClock = sf::Clock {};
+    sf::Texture shaderTexture;
+    shaderTexture.create(kWidth, kHeight);
+    sf::Sprite shaderSprite {shaderTexture};
+    sf::Shader shader;
+    shader.loadFromFile("../../shaders/shader.frag", sf::Shader::Fragment);
+    shader.setUniform("iResolution", sf::Vector2f(kWidth, kHeight));
+
 
     while (window.isOpen())
     {
@@ -93,6 +111,9 @@ int main()
             std::cout << "Pressed: " << nPressed++ << std::endl;
             applyForce = true;
         };
+        static float fogAlpha {0.5f};
+        ImGui::SliderFloat("Fog Alpha", &fogAlpha, 0.f, 1.f);
+        shader.setUniform("iAlpha", fogAlpha);
         ImGui::End();
 
         // do sfml drawing, things are drawn in a linear sequence
@@ -107,6 +128,10 @@ int main()
             s.sprite.setRotation(s.body->GetAngle() * DEG_PER_RAD);
             window.draw(s.sprite);
         }
+        // apply shader
+        shader.setUniform("iTime", shaderClock.getElapsedTime().asSeconds());
+        window.draw(shaderSprite, &shader);
+
         // render imgui
         ImGui::SFML::Render(window);
         // display everything
