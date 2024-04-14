@@ -23,10 +23,10 @@ FetchContent_Declare(ImGui-SFML
     GIT_TAG 2.6.x)
 FetchContent_MakeAvailable(ImGui-SFML)
 
+option(BOX2D_BUILD_UNIT_TESTS OFF)
 FetchContent_Declare(box2d
         GIT_REPOSITORY      https://github.com/erincatto/Box2D.git
-        GIT_TAG             v2.4.1
-        CMAKE_ARGS      -DBOX2D_BUILD_UNIT_TESTS=OFF)
+        GIT_TAG             v2.4.1)
 FetchContent_MakeAvailable(box2d)
 
 add_executable(CMakeSFMLProject src/main.cpp)
