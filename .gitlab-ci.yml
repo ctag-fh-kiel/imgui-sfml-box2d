@@ -17,7 +17,7 @@ build_windows:
       cmake -G "MinGW Makefiles" ..
       mingw32-make
       mkdir dist
-      cp *.exe dist
+      cp bin/CMakeSFMLProject.exe dist
       zip -r $NAME_ZIP dist
       mv $NAME_ZIP ../.
   artifacts:
