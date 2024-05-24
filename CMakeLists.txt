@@ -33,7 +33,7 @@ add_executable(CMakeSFMLProject src/main.cpp)
 target_link_libraries(CMakeSFMLProject PRIVATE sfml-graphics ImGui-SFML::ImGui-SFML box2d)
 target_compile_features(CMakeSFMLProject PRIVATE cxx_std_17)
 
-if(MINGW)
+if(WIN32)
     # create install target
     install(TARGETS CMakeSFMLProject DESTINATION bin)
 
